@@ -39,32 +39,34 @@ export function createLiquidityPosition(exchange: Address, userAddrs: Address, b
     .concat(userAddrs.toHexString())
   let lp = LiquidityPosition.load(id)
   if (lp === null) {
-    log.error('LiquidityTokenBalance was not found, creating new one', [id])
+    log.error('LiquidityPosition was not found, creating new one', [id])
 
 
     lp = new LiquidityPosition(id)
     lp.poolAddress = exchange
     lp.user = user.id
     lp.poolProviderName = "Uniswap"
-    lp.save()
   }
 
   lp.balance = convertTokenToDecimal(balance, BI_18);
+  lp.save()
 
   return lp as LiquidityPosition
 }
 
 export function handleMint(event: Mint): void {
   let uniV2TokenAddrs = event.address;
-  let userAddrs = event.transaction.from;
   let contract = ERC20.bind(uniV2TokenAddrs);
-  createLiquidityPosition(uniV2TokenAddrs, userAddrs, contract.balanceOf(userAddrs));
+  let userAddrs = event.transaction.from;
+  let balance = contract.balanceOf(userAddrs);
+  createLiquidityPosition(uniV2TokenAddrs, userAddrs, balance);
 }
 
 export function handleBurn(event: Burn): void {
   let uniV2TokenAddrs = event.address;
   let userAddrs = event.transaction.from;
   let contract = ERC20.bind(uniV2TokenAddrs);
-  createLiquidityPosition(uniV2TokenAddrs, userAddrs, contract.balanceOf(userAddrs));
+  let balance = contract.balanceOf(userAddrs);
+  createLiquidityPosition(uniV2TokenAddrs, userAddrs, balance);
 }
 

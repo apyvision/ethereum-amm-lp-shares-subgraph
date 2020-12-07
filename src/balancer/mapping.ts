@@ -2,6 +2,7 @@ import {BPool, LOG_EXIT, LOG_JOIN} from '../../generated/BFactory/BPool'
 import {LiquidityPosition, User} from '../../generated/schema'
 import {Address, BigDecimal, BigInt, log} from "@graphprotocol/graph-ts";
 import {LOG_NEW_POOL} from "../../generated/BFactory/BFactory";
+import {BPool as BPoolTemplate} from '../../generated/templates'
 
 let BI_18 = BigInt.fromI32(18)
 let ZERO_BI = BigInt.fromI32(0)
@@ -31,12 +32,14 @@ export function handleNewPool(event: LOG_NEW_POOL): void {
   let tx = event.transaction.hash.toHexString();
   let userAddrs = event.transaction.from;
   logMintEvent(poolAddress, tx, userAddrs);
+  BPoolTemplate.create(poolAddress);
 }
 
 export function handleJoin(event: LOG_JOIN): void {
   let poolAddress = event.address;
   let tx = event.transaction.hash.toHexString();
   let userAddrs = event.transaction.from;
+  log.error("[BAL] Creating factory tracking for pair: {}", [poolAddress.toHexString()])
   logMintEvent(poolAddress, tx, userAddrs);
 }
 
