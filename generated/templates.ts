@@ -16,12 +16,30 @@ export class BPool extends DataSourceTemplate {
   }
 }
 
-export class Pair extends DataSourceTemplate {
+export class UniswapPair extends DataSourceTemplate {
   static create(address: Address): void {
-    DataSourceTemplate.create("Pair", [address.toHex()]);
+    DataSourceTemplate.create("UniswapPair", [address.toHex()]);
   }
 
   static createWithContext(address: Address, context: DataSourceContext): void {
-    DataSourceTemplate.createWithContext("Pair", [address.toHex()], context);
+    DataSourceTemplate.createWithContext(
+      "UniswapPair",
+      [address.toHex()],
+      context
+    );
+  }
+}
+
+export class SushiswapPair extends DataSourceTemplate {
+  static create(address: Address): void {
+    DataSourceTemplate.create("SushiswapPair", [address.toHex()]);
+  }
+
+  static createWithContext(address: Address, context: DataSourceContext): void {
+    DataSourceTemplate.createWithContext(
+      "SushiswapPair",
+      [address.toHex()],
+      context
+    );
   }
 }

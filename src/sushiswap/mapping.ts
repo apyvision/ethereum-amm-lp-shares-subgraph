@@ -1,7 +1,7 @@
 /* eslint-disable prefer-const */
 import {BigInt, BigDecimal, store, Address} from '@graphprotocol/graph-ts'
-import {Mint, Burn} from '../../generated/templates/Pair/Pair'
-import {ERC20} from '../../generated/templates/Pair/ERC20'
+import {Mint, Burn} from '../../generated/templates/SushiswapPair/Pair'
+import {ERC20} from '../../generated/templates/SushiswapPair/ERC20'
 import {log} from "@graphprotocol/graph-ts/index";
 import {LiquidityPosition, User} from "../../generated/schema";
 
