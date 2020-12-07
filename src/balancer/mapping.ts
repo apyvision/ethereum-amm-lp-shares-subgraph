@@ -32,6 +32,7 @@ export function handleNewPool(event: LOG_NEW_POOL): void {
   let tx = event.transaction.hash.toHexString();
   let userAddrs = event.transaction.from;
   logMintEvent(poolAddress, tx, userAddrs);
+  log.error("[BAL] Creating factory tracking for pair: {}", [poolAddress.toHexString()])
   BPoolTemplate.create(poolAddress);
 }
 
@@ -39,7 +40,6 @@ export function handleJoin(event: LOG_JOIN): void {
   let poolAddress = event.address;
   let tx = event.transaction.hash.toHexString();
   let userAddrs = event.transaction.from;
-  log.error("[BAL] Creating factory tracking for pair: {}", [poolAddress.toHexString()])
   logMintEvent(poolAddress, tx, userAddrs);
 }
 
@@ -63,8 +63,8 @@ function logMintEvent(poolAddress: Address, tx: string, userAddrs: Address): voi
       lp = new LiquidityPosition(lpId)
       lp.user = user.id
       lp.poolProviderName = sym == "BPT" ? "Balancer" : "YFV"
+      lp.poolAddress = poolAddress
     }
-    lp.poolAddress = poolAddress
     lp.balance = convertTokenToDecimal(BPool.bind(poolAddress).balanceOf(userAddrs), BI_18)
     lp.save()
   }
