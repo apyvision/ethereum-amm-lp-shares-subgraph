@@ -1,4 +1,4 @@
-import {BPool, LOG_EXIT, LOG_JOIN} from '../../generated/BPool/BPool'
+import {BPool, LOG_EXIT, LOG_JOIN} from '../../generated/BFactory/BPool'
 import {LiquidityPosition, User} from '../../generated/schema'
 import {Address, BigDecimal, BigInt, log} from "@graphprotocol/graph-ts";
 import {LOG_NEW_POOL} from "../../generated/BFactory/BFactory";
