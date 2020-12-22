@@ -6,13 +6,31 @@ import {
   DataSourceContext
 } from "@graphprotocol/graph-ts";
 
-export class BPool extends DataSourceTemplate {
+export class BalancerBPool extends DataSourceTemplate {
   static create(address: Address): void {
-    DataSourceTemplate.create("BPool", [address.toHex()]);
+    DataSourceTemplate.create("BalancerBPool", [address.toHex()]);
   }
 
   static createWithContext(address: Address, context: DataSourceContext): void {
-    DataSourceTemplate.createWithContext("BPool", [address.toHex()], context);
+    DataSourceTemplate.createWithContext(
+      "BalancerBPool",
+      [address.toHex()],
+      context
+    );
+  }
+}
+
+export class ValueBPool extends DataSourceTemplate {
+  static create(address: Address): void {
+    DataSourceTemplate.create("ValueBPool", [address.toHex()]);
+  }
+
+  static createWithContext(address: Address, context: DataSourceContext): void {
+    DataSourceTemplate.createWithContext(
+      "ValueBPool",
+      [address.toHex()],
+      context
+    );
   }
 }
 

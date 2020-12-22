@@ -2,8 +2,7 @@ import {BPool, LOG_EXIT, LOG_JOIN, Transfer} from '../../generated/BFactory/BPoo
 import {LiquidityPosition, User, UserLiquidityPositionDayData} from '../../generated/schema'
 import {Address, BigDecimal, BigInt, log} from "@graphprotocol/graph-ts";
 import {LOG_NEW_POOL} from "../../generated/BFactory/BFactory";
-import {BPool as BPoolTemplate} from '../../generated/templates'
-import {ethereum} from "@graphprotocol/graph-ts/index";
+import {BalancerBPool as BPoolTemplate} from '../../generated/templates'
 import {updateDayData} from "../util";
 
 let BI_18 = BigInt.fromI32(18)

@@ -5,7 +5,7 @@ schema:
   file: schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: BFactory
+    name: BalancerBFactory
     network: mainnet
     source:
       address: "0x9424B1412450D0f8Fc2255FAf6046b98213B76Bd"
@@ -18,12 +18,37 @@ dataSources:
       file: ./src/balancer/mapping.ts
       entities:
         - User
+        - UserDay
         - LiquidityPosition
       abis:
         - name: BFactory
           file: ./abis/balancer/BFactory.json
         - name: BPool
           file: ./abis/balancer/BPool.json
+      eventHandlers:
+        - event: LOG_NEW_POOL(indexed address,indexed address)
+          handler: handleNewPool
+  - kind: ethereum/contract
+    name: ValueBFactory
+    network: mainnet
+    source:
+      address: "0xebc44681c125d63210a33d30c55fd3d37762675b"
+      abi: BFactory
+      startBlock: 10961776
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/value/mapping.ts
+      entities:
+        - User
+        - UserDay
+        - LiquidityPosition
+      abis:
+        - name: BFactory
+          file: ./abis/value/BFactory.json
+        - name: FaaSPoolLite
+          file: ./abis/value/FaaSPoolLite.json
       eventHandlers:
         - event: LOG_NEW_POOL(indexed address,indexed address)
           handler: handleNewPool
@@ -71,7 +96,7 @@ dataSources:
           handler: handleNewPair
 templates:
   - kind: ethereum/contract
-    name: BPool
+    name: BalancerBPool
     network: mainnet
     source:
       abi: BPool
@@ -87,6 +112,30 @@ templates:
       abis:
         - name: BPool
           file: ./abis/balancer/BPool.json
+      eventHandlers:
+        - event: LOG_JOIN(indexed address,indexed address,uint256)
+          handler: handleJoin
+        - event: LOG_EXIT(indexed address,indexed address,uint256)
+          handler: handleBurn
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+  - kind: ethereum/contract
+    name: ValueBPool
+    network: mainnet
+    source:
+      abi: FaaSPoolLite
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/value/mapping.ts
+      entities:
+        - User
+        - UserDay
+        - LiquidityPosition
+      abis:
+        - name: FaaSPoolLite
+          file: ./abis/value/FaaSPoolLite.json
       eventHandlers:
         - event: LOG_JOIN(indexed address,indexed address,uint256)
           handler: handleJoin

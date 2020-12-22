@@ -1,8 +1,8 @@
-import {BPool, LOG_EXIT, LOG_JOIN, Transfer} from '../../generated/BFactory/BPool'
+import {FaaSPoolLite, LOG_EXIT, LOG_JOIN, Transfer} from '../../generated/ValueBFactory/FaaSPoolLite'
 import {LiquidityPosition, User} from '../../generated/schema'
 import {Address, BigDecimal, BigInt, log} from "@graphprotocol/graph-ts";
 import {LOG_NEW_POOL} from "../../generated/BFactory/BFactory";
-import {BPool as BPoolTemplate} from '../../generated/templates'
+import {ValueBPool as BPoolTemplate} from '../../generated/templates'
 
 let BI_18 = BigInt.fromI32(18)
 let ZERO_BI = BigInt.fromI32(0)
@@ -44,7 +44,7 @@ export function handleJoin(event: LOG_JOIN): void {
 }
 
 function logMintEvent(poolAddress: Address, tx: string, userAddrs: Address): void {
-  let sym = BPool.bind(poolAddress).symbol();
+  let sym = FaaSPoolLite.bind(poolAddress).symbol();
   log.info("Sym is: {} and tx is: {}", [sym, tx])
   if (sym == "BPT" || sym == "VLP") {
     let userId = userAddrs.toHex()
@@ -65,7 +65,7 @@ function logMintEvent(poolAddress: Address, tx: string, userAddrs: Address): voi
       lp.poolProviderName = sym == "BPT" ? "Balancer" : "YFV"
       lp.poolAddress = poolAddress
     }
-    lp.balance = convertTokenToDecimal(BPool.bind(poolAddress).balanceOf(userAddrs), BI_18)
+    lp.balance = convertTokenToDecimal(FaaSPoolLite.bind(poolAddress).balanceOf(userAddrs), BI_18)
     lp.save()
   }
 }
@@ -73,7 +73,7 @@ function logMintEvent(poolAddress: Address, tx: string, userAddrs: Address): voi
 
 export function handleBurn(event: LOG_EXIT): void {
   let poolAddress = event.address;
-  let sym = BPool.bind(poolAddress).symbol();
+  let sym = FaaSPoolLite.bind(poolAddress).symbol();
   let tx = event.transaction.hash.toHexString();
 
   log.info("Sym is: {} and tx is: {}", [sym, tx])
@@ -98,7 +98,7 @@ export function handleBurn(event: LOG_EXIT): void {
       lp.poolProviderName = sym == "BPT" ? "Balancer" : "YFV"
     }
     lp.poolAddress = poolAddress
-    lp.balance = convertTokenToDecimal(BPool.bind(poolAddress).balanceOf(userAddrs), BI_18)
+    lp.balance = convertTokenToDecimal(FaaSPoolLite.bind(poolAddress).balanceOf(userAddrs), BI_18)
     lp.save()
   }
 
