@@ -83,13 +83,18 @@ export function handleTransfer(event: Transfer): void {
   let contract = ERC20.bind(uniV2TokenAddrs);
 
   let to = event.transaction.to as Address;
-  let balance = contract.balanceOf(to);
-  let lp = createOrUpdate(uniV2TokenAddrs, to, balance, false);
-  updateDayData(lp, to, event);
+
+  if (to != uniV2TokenAddrs) {
+    let balance = contract.balanceOf(to);
+    let lp = createOrUpdate(uniV2TokenAddrs, to, balance, false);
+    updateDayData(lp, to, event);
+  }
 
   let from = event.transaction.from as Address;
-  let balanceFrom = contract.balanceOf(from);
-  let lpFrom = createOrUpdate(uniV2TokenAddrs, from, balance, false);
-  updateDayData(lpFrom, from, event);
+  if (from != uniV2TokenAddrs) {
+    let balanceFrom = contract.balanceOf(from);
+    let lpFrom = createOrUpdate(uniV2TokenAddrs, from, balanceFrom, false);
+    updateDayData(lpFrom, from, event);
+  }
 }
 

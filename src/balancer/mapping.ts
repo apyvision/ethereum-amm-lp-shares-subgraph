@@ -28,7 +28,7 @@ function getLpId(poolAddress: Address, userAddress: Address): string {
   return poolAddress.toHexString().concat('-').concat(userAddress.toHexString());
 }
 
-function createOrUpdate(poolAddress: Address, tx: string, userAddrs: Address, blockNumber: number, isMintOrBurn: boolean): LiquidityPosition {
+function createOrUpdate(poolAddress: Address, tx: string, userAddrs: Address, isMintOrBurn: boolean): LiquidityPosition {
   let userId = userAddrs.toHex()
   let user = User.load(userId)
   if (user == null) {
@@ -57,9 +57,9 @@ function createOrUpdate(poolAddress: Address, tx: string, userAddrs: Address, bl
 export function handleNewPool(event: LOG_NEW_POOL): void {
   let poolAddress = event.params.pool;
   let tx = event.transaction.hash.toHexString();
-  let blockNumber = event.block.number.toI32();
   let userAddrs = event.transaction.from;
-  let lp = createOrUpdate(poolAddress, tx, userAddrs, blockNumber, true);
+  let lp = createOrUpdate(poolAddress, tx, userAddrs, true);
+  updateDayData(lp, userAddrs, event);
   log.error("[BAL] Creating factory tracking for pair: {}", [poolAddress.toHexString()])
   BPoolTemplate.create(poolAddress);
 }
@@ -67,29 +67,36 @@ export function handleNewPool(event: LOG_NEW_POOL): void {
 export function handleJoin(event: LOG_JOIN): void {
   let poolAddress = event.address;
   let tx = event.transaction.hash.toHexString();
-  let blockNumber = event.block.number.toI32();
   let userAddrs = event.transaction.from;
-  let lp = createOrUpdate(poolAddress, tx, userAddrs, blockNumber, true);
+  log.error("[BAL] handle join for tx: {}", [tx])
+  let lp = createOrUpdate(poolAddress, tx, userAddrs, true);
+  updateDayData(lp, userAddrs, event);
 }
 
 export function handleBurn(event: LOG_EXIT): void {
   let poolAddress = event.address;
   let tx = event.transaction.hash.toHexString();
-  let blockNumber = event.block.number.toI32();
+  log.error("[BAL] handle burn for tx: {}", [tx])
   let userAddrs = event.transaction.from;
-  let lp = createOrUpdate(poolAddress, tx, userAddrs, blockNumber, true);
+  let lp = createOrUpdate(poolAddress, tx, userAddrs, true);
   updateDayData(lp, userAddrs, event);
 }
 
 export function handleTransfer(event: Transfer): void {
   let poolAddress = event.address;
   let tx = event.transaction.hash.toHexString();
-  let blockNumber = event.block.number.toI32();
+  log.error("[BAL] handle transfer for tx: {}", [tx])
+
   let from = event.transaction.from;
-  let lp = createOrUpdate(poolAddress, tx, from, blockNumber, false);
-  updateDayData(lp, from, event);
+  if (from != poolAddress) {
+    let lp = createOrUpdate(poolAddress, tx, from, false);
+    updateDayData(lp, from, event);
+  }
+
   let to = event.transaction.to;
-  let lp2 = createOrUpdate(poolAddress, tx, to as Address, blockNumber, false);
-  updateDayData(lp2, to as Address, event);
+  if (to != poolAddress) {
+    let lp2 = createOrUpdate(poolAddress, tx, to as Address, false);
+    updateDayData(lp2, to as Address, event);
+  }
 }
 

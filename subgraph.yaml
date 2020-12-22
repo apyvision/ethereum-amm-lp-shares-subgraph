@@ -10,7 +10,7 @@ dataSources:
     source:
       address: "0x9424B1412450D0f8Fc2255FAf6046b98213B76Bd"
       abi: BFactory
-      startBlock: 9562480
+      startBlock: 11400610
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -58,7 +58,7 @@ dataSources:
     source:
       address: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f'
       abi: Factory
-      startBlock: 10000834
+      startBlock: 11400610
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -79,7 +79,7 @@ dataSources:
     source:
       address: '0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac'
       abi: Factory
-      startBlock: 10794229
+      startBlock: 11400610
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -107,8 +107,8 @@ templates:
       file: ./src/balancer/mapping.ts
       entities:
         - User
-        - UserDay
         - LiquidityPosition
+        - UserLiquidityPositionDayData
       abis:
         - name: BPool
           file: ./abis/balancer/BPool.json
@@ -131,8 +131,8 @@ templates:
       file: ./src/value/mapping.ts
       entities:
         - User
-        - UserDay
         - LiquidityPosition
+        - UserLiquidityPositionDayData
       abis:
         - name: FaaSPoolLite
           file: ./abis/value/FaaSPoolLite.json
@@ -155,7 +155,7 @@ templates:
       file: ./src/uniswap/mapping.ts
       entities:
         - User
-        - UserDay
+        - UserLiquidityPositionDayData
         - LiquidityPosition
       abis:
         - name: Pair
@@ -181,7 +181,7 @@ templates:
       file: ./src/sushiswap/mapping.ts
       entities:
         - User
-        - UserDay
+        - UserLiquidityPositionDayData
         - LiquidityPosition
       abis:
         - name: Pair

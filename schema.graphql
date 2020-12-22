@@ -27,5 +27,5 @@ enum PoolProvider {
   Balancer
   Uniswap
   Sushiswap
-  YFV
+  VALUE
 }
