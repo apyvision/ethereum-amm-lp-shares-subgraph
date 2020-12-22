@@ -1,10 +1,10 @@
 /* eslint-disable prefer-const */
-import { BigInt, BigDecimal, ethereum, Address } from '@graphprotocol/graph-ts'
+import {BigInt, BigDecimal, ethereum, Address} from '@graphprotocol/graph-ts'
 import {Mint, Burn, Transfer} from '../../generated/templates/UniswapPair/Pair'
 import {ERC20} from '../../generated/templates/UniswapPair/ERC20'
 import {log} from "@graphprotocol/graph-ts/index";
 import {LiquidityPosition, User, UserLiquidityPositionDayData} from "../../generated/schema";
-import {updateDayData} from "../util";
+import {ADDRESS_ZERO, updateDayData} from "../util";
 
 let BI_18 = BigInt.fromI32(18);
 let ZERO_BI = BigInt.fromI32(0);
@@ -41,14 +41,11 @@ export function createOrUpdate(exchange: Address, userAddrs: Address, balance: B
   let lp = LiquidityPosition.load(id)
   if (lp === null) {
     log.warning('LiquidityPosition was not found, creating new one', [id])
-
-
     lp = new LiquidityPosition(id)
     lp.poolAddress = exchange
     lp.user = user.id
-    lp.poolProviderName = "Uniswap"
     lp.balanceFromMintBurn = ZERO_BI.toBigDecimal()
-
+    lp.poolProviderName = "Uniswap"
   }
 
   let bal = convertTokenToDecimal(balance, BI_18);
@@ -83,16 +80,15 @@ export function handleTransfer(event: Transfer): void {
   let uniV2TokenAddrs = event.address;
   let contract = ERC20.bind(uniV2TokenAddrs);
 
-  let to = event.transaction.to as Address;
-
-  if (to != uniV2TokenAddrs) {
+  let to = event.params.to as Address;
+  if (to != uniV2TokenAddrs && to.toHexString() != ADDRESS_ZERO) {
     let balance = contract.balanceOf(to);
     let lp = createOrUpdate(uniV2TokenAddrs, to, balance, false);
     updateDayData(lp, to, event);
   }
 
-  let from = event.transaction.from as Address;
-  if (from != uniV2TokenAddrs) {
+  let from = event.params.from as Address;
+  if (from != uniV2TokenAddrs && from.toHexString() != ADDRESS_ZERO) {
     let balanceFrom = contract.balanceOf(from);
     let lpFrom = createOrUpdate(uniV2TokenAddrs, from, balanceFrom, false);
     updateDayData(lpFrom, from, event);

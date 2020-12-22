@@ -89,8 +89,6 @@ export function handleBurn(event: LOG_EXIT): void {
   log.warning("[VALUE] handle burn for tx: {}", [tx])
   let userAddrs = event.transaction.from;
   let lp = createOrUpdate(poolAddress, userAddrs, true);
-  lp.balanceFromMintBurn = lp.balance
-  lp.save()
   updateDayData(lp, userAddrs, event);
 }
 
