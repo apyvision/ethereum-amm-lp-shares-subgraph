@@ -82,6 +82,7 @@ templates:
       file: ./src/balancer/mapping.ts
       entities:
         - User
+        - UserDay
         - LiquidityPosition
       abis:
         - name: BPool
@@ -91,6 +92,8 @@ templates:
           handler: handleJoin
         - event: LOG_EXIT(indexed address,indexed address,uint256)
           handler: handleBurn
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
   - kind: ethereum/contract
     name: UniswapPair
     network: mainnet
@@ -103,6 +106,7 @@ templates:
       file: ./src/uniswap/mapping.ts
       entities:
         - User
+        - UserDay
         - LiquidityPosition
       abis:
         - name: Pair
@@ -114,6 +118,8 @@ templates:
           handler: handleMint
         - event: Burn(indexed address,uint256,uint256,indexed address)
           handler: handleBurn
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
   - kind: ethereum/contract
     name: SushiswapPair
     network: mainnet
@@ -126,6 +132,7 @@ templates:
       file: ./src/sushiswap/mapping.ts
       entities:
         - User
+        - UserDay
         - LiquidityPosition
       abis:
         - name: Pair
@@ -137,3 +144,5 @@ templates:
           handler: handleMint
         - event: Burn(indexed address,uint256,uint256,indexed address)
           handler: handleBurn
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer

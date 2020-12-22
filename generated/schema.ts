@@ -102,6 +102,15 @@ export class LiquidityPosition extends Entity {
     this.set("user", Value.fromString(value));
   }
 
+  get block(): i32 {
+    let value = this.get("block");
+    return value.toI32();
+  }
+
+  set block(value: i32) {
+    this.set("block", Value.fromI32(value));
+  }
+
   get poolAddress(): Bytes {
     let value = this.get("poolAddress");
     return value.toBytes();
@@ -118,6 +127,106 @@ export class LiquidityPosition extends Entity {
 
   set balance(value: BigDecimal) {
     this.set("balance", Value.fromBigDecimal(value));
+  }
+
+  get balanceFromMintBurn(): BigDecimal {
+    let value = this.get("balanceFromMintBurn");
+    return value.toBigDecimal();
+  }
+
+  set balanceFromMintBurn(value: BigDecimal) {
+    this.set("balanceFromMintBurn", Value.fromBigDecimal(value));
+  }
+
+  get poolProviderName(): string {
+    let value = this.get("poolProviderName");
+    return value.toString();
+  }
+
+  set poolProviderName(value: string) {
+    this.set("poolProviderName", Value.fromString(value));
+  }
+}
+
+export class UserLiquidityPositionDayData extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(
+      id !== null,
+      "Cannot save UserLiquidityPositionDayData entity without an ID"
+    );
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save UserLiquidityPositionDayData entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("UserLiquidityPositionDayData", id.toString(), this);
+  }
+
+  static load(id: string): UserLiquidityPositionDayData | null {
+    return store.get(
+      "UserLiquidityPositionDayData",
+      id
+    ) as UserLiquidityPositionDayData | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get date(): i32 {
+    let value = this.get("date");
+    return value.toI32();
+  }
+
+  set date(value: i32) {
+    this.set("date", Value.fromI32(value));
+  }
+
+  get userAddress(): Bytes {
+    let value = this.get("userAddress");
+    return value.toBytes();
+  }
+
+  set userAddress(value: Bytes) {
+    this.set("userAddress", Value.fromBytes(value));
+  }
+
+  get poolAddress(): Bytes {
+    let value = this.get("poolAddress");
+    return value.toBytes();
+  }
+
+  set poolAddress(value: Bytes) {
+    this.set("poolAddress", Value.fromBytes(value));
+  }
+
+  get balance(): BigDecimal {
+    let value = this.get("balance");
+    return value.toBigDecimal();
+  }
+
+  set balance(value: BigDecimal) {
+    this.set("balance", Value.fromBigDecimal(value));
+  }
+
+  get balanceFromMintBurn(): BigDecimal {
+    let value = this.get("balanceFromMintBurn");
+    return value.toBigDecimal();
+  }
+
+  set balanceFromMintBurn(value: BigDecimal) {
+    this.set("balanceFromMintBurn", Value.fromBigDecimal(value));
   }
 
   get poolProviderName(): string {

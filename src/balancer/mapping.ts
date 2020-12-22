@@ -1,8 +1,10 @@
-import {BPool, LOG_EXIT, LOG_JOIN} from '../../generated/BFactory/BPool'
-import {LiquidityPosition, User} from '../../generated/schema'
+import {BPool, LOG_EXIT, LOG_JOIN, Transfer} from '../../generated/BFactory/BPool'
+import {LiquidityPosition, User, UserLiquidityPositionDayData} from '../../generated/schema'
 import {Address, BigDecimal, BigInt, log} from "@graphprotocol/graph-ts";
 import {LOG_NEW_POOL} from "../../generated/BFactory/BFactory";
 import {BPool as BPoolTemplate} from '../../generated/templates'
+import {ethereum} from "@graphprotocol/graph-ts/index";
+import {updateDayData} from "../util";
 
 let BI_18 = BigInt.fromI32(18)
 let ZERO_BI = BigInt.fromI32(0)
@@ -27,11 +29,38 @@ function getLpId(poolAddress: Address, userAddress: Address): string {
   return poolAddress.toHexString().concat('-').concat(userAddress.toHexString());
 }
 
+function createOrUpdate(poolAddress: Address, tx: string, userAddrs: Address, blockNumber: BigInt, isMintOrBurn: Boolean): LiquidityPosition {
+  let userId = userAddrs.toHex()
+  let user = User.load(userId)
+  if (user == null) {
+    user = new User(userId)
+    user.save()
+  }
+
+  let lpId = getLpId(poolAddress, userAddrs)
+  let lp = LiquidityPosition.load(lpId)
+  if (lp == null) {
+    lp = new LiquidityPosition(lpId)
+    lp.user = user.id
+    lp.poolProviderName = "Balancer"
+    lp.poolAddress = poolAddress
+  }
+  let bal = convertTokenToDecimal(BPool.bind(poolAddress).balanceOf(userAddrs), BI_18);
+  lp.block = blockNumber;
+  lp.balance = bal
+  if (isMintOrBurn) {
+    lp.balanceFromMintBurn = bal
+  }
+  lp.save()
+  return lp
+}
+
 export function handleNewPool(event: LOG_NEW_POOL): void {
   let poolAddress = event.params.pool;
   let tx = event.transaction.hash.toHexString();
+  let blockNumber = event.block.number.toI32();
   let userAddrs = event.transaction.from;
-  logMintEvent(poolAddress, tx, userAddrs);
+  let lp = createOrUpdate(poolAddress, tx, userAddrs, blockNumber, true);
   log.error("[BAL] Creating factory tracking for pair: {}", [poolAddress.toHexString()])
   BPoolTemplate.create(poolAddress);
 }
@@ -39,68 +68,29 @@ export function handleNewPool(event: LOG_NEW_POOL): void {
 export function handleJoin(event: LOG_JOIN): void {
   let poolAddress = event.address;
   let tx = event.transaction.hash.toHexString();
+  let blockNumber = event.block.number.toI32();
   let userAddrs = event.transaction.from;
-  logMintEvent(poolAddress, tx, userAddrs);
+  let lp = createOrUpdate(poolAddress, tx, userAddrs, blockNumber, true);
 }
-
-function logMintEvent(poolAddress: Address, tx: string, userAddrs: Address): void {
-  let sym = BPool.bind(poolAddress).symbol();
-  log.info("Sym is: {} and tx is: {}", [sym, tx])
-  if (sym == "BPT" || sym == "VLP") {
-    let userId = userAddrs.toHex()
-
-    log.info("event caller is: {}, tx is: {}", [userId, tx])
-
-    let user = User.load(userId)
-    if (user == null) {
-      user = new User(userId)
-      user.save()
-    }
-
-    let lpId = getLpId(poolAddress, userAddrs)
-    let lp = LiquidityPosition.load(lpId)
-    if (lp == null) {
-      lp = new LiquidityPosition(lpId)
-      lp.user = user.id
-      lp.poolProviderName = sym == "BPT" ? "Balancer" : "YFV"
-      lp.poolAddress = poolAddress
-    }
-    lp.balance = convertTokenToDecimal(BPool.bind(poolAddress).balanceOf(userAddrs), BI_18)
-    lp.save()
-  }
-}
-
 
 export function handleBurn(event: LOG_EXIT): void {
   let poolAddress = event.address;
-  let sym = BPool.bind(poolAddress).symbol();
   let tx = event.transaction.hash.toHexString();
+  let blockNumber = event.block.number.toI32();
+  let userAddrs = event.transaction.from;
+  let lp = createOrUpdate(poolAddress, tx, userAddrs, blockNumber, true);
+  updateDayData(lp, userAddrs, event);
+}
 
-  log.info("Sym is: {} and tx is: {}", [sym, tx])
-
-  if (sym == "BPT" || sym == "VLP") {
-    let userAddrs = event.transaction.from;
-    let userId = userAddrs.toHex()
-
-    log.info("event caller is: {}, tx is: {}", [userId, tx])
-
-    let user = User.load(userId)
-    if (user == null) {
-      user = new User(userId)
-      user.save()
-    }
-
-    let lpId = getLpId(poolAddress, userAddrs)
-    let lp = LiquidityPosition.load(lpId)
-    if (lp == null) {
-      lp = new LiquidityPosition(lpId)
-      lp.user = user.id
-      lp.poolProviderName = sym == "BPT" ? "Balancer" : "YFV"
-    }
-    lp.poolAddress = poolAddress
-    lp.balance = convertTokenToDecimal(BPool.bind(poolAddress).balanceOf(userAddrs), BI_18)
-    lp.save()
-  }
-
+export function handleTransfer(event: Transfer): void {
+  let poolAddress = event.address;
+  let tx = event.transaction.hash.toHexString();
+  let blockNumber = event.block.number.toI32();
+  let from = event.transaction.from;
+  let lp = createOrUpdate(poolAddress, tx, from, blockNumber, false);
+  updateDayData(lp, from, event);
+  let to = event.transaction.to;
+  let lp2 = createOrUpdate(poolAddress, tx, to, blockNumber, false);
+  updateDayData(lp2, to, event);
 }
 
