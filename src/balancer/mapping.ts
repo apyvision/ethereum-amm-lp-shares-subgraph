@@ -28,7 +28,7 @@ function getLpId(poolAddress: Address, userAddress: Address): string {
   return poolAddress.toHexString().concat('-').concat(userAddress.toHexString());
 }
 
-function createOrUpdate(poolAddress: Address, tx: string, userAddrs: Address, blockNumber: BigInt, isMintOrBurn: Boolean): LiquidityPosition {
+function createOrUpdate(poolAddress: Address, tx: string, userAddrs: Address, blockNumber: number, isMintOrBurn: boolean): LiquidityPosition {
   let userId = userAddrs.toHex()
   let user = User.load(userId)
   if (user == null) {
@@ -43,15 +43,15 @@ function createOrUpdate(poolAddress: Address, tx: string, userAddrs: Address, bl
     lp.user = user.id
     lp.poolProviderName = "Balancer"
     lp.poolAddress = poolAddress
+    lp.balanceFromMintBurn = ZERO_BI.toBigDecimal()
   }
   let bal = convertTokenToDecimal(BPool.bind(poolAddress).balanceOf(userAddrs), BI_18);
-  lp.block = blockNumber;
   lp.balance = bal
   if (isMintOrBurn) {
     lp.balanceFromMintBurn = bal
   }
   lp.save()
-  return lp
+  return lp as LiquidityPosition
 }
 
 export function handleNewPool(event: LOG_NEW_POOL): void {
@@ -89,7 +89,7 @@ export function handleTransfer(event: Transfer): void {
   let lp = createOrUpdate(poolAddress, tx, from, blockNumber, false);
   updateDayData(lp, from, event);
   let to = event.transaction.to;
-  let lp2 = createOrUpdate(poolAddress, tx, to, blockNumber, false);
-  updateDayData(lp2, to, event);
+  let lp2 = createOrUpdate(poolAddress, tx, to as Address, blockNumber, false);
+  updateDayData(lp2, to as Address, event);
 }
 

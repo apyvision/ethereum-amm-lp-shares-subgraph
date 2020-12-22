@@ -18,7 +18,7 @@ To deploy, please use:
     --debug \
     --node https://api.thegraph.com/deploy/ \
     --ipfs https://api.thegraph.com/ipfs/ \
-    apyvision/amm-lp-shares
+    apyvision/amm-lp-shares-v0
 ```
 
 

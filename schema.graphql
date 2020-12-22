@@ -6,7 +6,6 @@ type User @entity {
 type LiquidityPosition @entity {
   id: ID!
   user: User!
-  block: Int! # saved for fast historical lookups
   poolAddress: Bytes!
   balance: BigDecimal!
   balanceFromMintBurn: BigDecimal!

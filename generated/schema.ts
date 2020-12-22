@@ -102,15 +102,6 @@ export class LiquidityPosition extends Entity {
     this.set("user", Value.fromString(value));
   }
 
-  get block(): i32 {
-    let value = this.get("block");
-    return value.toI32();
-  }
-
-  set block(value: i32) {
-    this.set("block", Value.fromI32(value));
-  }
-
   get poolAddress(): Bytes {
     let value = this.get("poolAddress");
     return value.toBytes();

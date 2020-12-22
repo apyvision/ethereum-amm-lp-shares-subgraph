@@ -25,7 +25,7 @@ function convertTokenToDecimal(tokenAmount: BigInt, exchangeDecimals: BigInt): B
   return tokenAmount.toBigDecimal().div(exponentToBigDecimal(exchangeDecimals));
 }
 
-export function createOrUpdate(exchange: Address, userAddrs: Address, balance: BigInt, blockNumber: BigInt, isMintOrBurn: Boolean): LiquidityPosition {
+export function createOrUpdate(exchange: Address, userAddrs: Address, balance: BigInt, isMintOrBurn: boolean): LiquidityPosition {
   let userId = userAddrs.toHexString()
 
   let user = User.load(userId)
@@ -47,10 +47,11 @@ export function createOrUpdate(exchange: Address, userAddrs: Address, balance: B
     lp.poolAddress = exchange
     lp.user = user.id
     lp.poolProviderName = "Uniswap"
+    lp.balanceFromMintBurn = ZERO_BI.toBigDecimal()
+
   }
 
   let bal = convertTokenToDecimal(balance, BI_18);
-  lp.block = blockNumber;
   lp.balance = bal;
   if (isMintOrBurn) {
     lp.balanceFromMintBurn = bal;
@@ -61,38 +62,35 @@ export function createOrUpdate(exchange: Address, userAddrs: Address, balance: B
 }
 
 export function handleMint(event: Mint): void {
-  let blockNumber = event.block.number.toI32();
   let uniV2TokenAddrs = event.address;
   let contract = ERC20.bind(uniV2TokenAddrs);
   let userAddrs = event.transaction.from;
   let balance = contract.balanceOf(userAddrs);
-  let lp = createOrUpdate(uniV2TokenAddrs, userAddrs, balance, blockNumber, true);
+  let lp = createOrUpdate(uniV2TokenAddrs, userAddrs, balance, true);
   updateDayData(lp, userAddrs, event);
 }
 
 export function handleBurn(event: Burn): void {
-  let blockNumber = event.block.number.toI32();
   let uniV2TokenAddrs = event.address;
   let userAddrs = event.transaction.from;
   let contract = ERC20.bind(uniV2TokenAddrs);
   let balance = contract.balanceOf(userAddrs);
-  let lp = createOrUpdate(uniV2TokenAddrs, userAddrs, balance, blockNumber, true);
+  let lp = createOrUpdate(uniV2TokenAddrs, userAddrs, balance, true);
   updateDayData(lp, userAddrs, event);
 }
 
 export function handleTransfer(event: Transfer): void {
   let uniV2TokenAddrs = event.address;
-  let blockNumber = event.block.number.toI32();
   let contract = ERC20.bind(uniV2TokenAddrs);
 
-  let to = event.transaction.to;
+  let to = event.transaction.to as Address;
   let balance = contract.balanceOf(to);
-  let lp = createOrUpdate(uniV2TokenAddrs, to, balance, blockNumber, false);
+  let lp = createOrUpdate(uniV2TokenAddrs, to, balance, false);
   updateDayData(lp, to, event);
 
-  let from = event.transaction.from;
+  let from = event.transaction.from as Address;
   let balanceFrom = contract.balanceOf(from);
-  let lpFrom = createOrUpdate(uniV2TokenAddrs, from, balance, blockNumber, false);
+  let lpFrom = createOrUpdate(uniV2TokenAddrs, from, balance, false);
   updateDayData(lpFrom, from, event);
 }
 
