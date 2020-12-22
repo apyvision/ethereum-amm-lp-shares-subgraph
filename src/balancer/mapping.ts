@@ -60,7 +60,7 @@ export function handleNewPool(event: LOG_NEW_POOL): void {
   let userAddrs = event.transaction.from;
   let lp = createOrUpdate(poolAddress, tx, userAddrs, true);
   updateDayData(lp, userAddrs, event);
-  log.error("[BAL] Creating factory tracking for pair: {}", [poolAddress.toHexString()])
+  log.warning("[BAL] Creating factory tracking for pair: {}", [poolAddress.toHexString()])
   BPoolTemplate.create(poolAddress);
 }
 
@@ -68,7 +68,7 @@ export function handleJoin(event: LOG_JOIN): void {
   let poolAddress = event.address;
   let tx = event.transaction.hash.toHexString();
   let userAddrs = event.transaction.from;
-  log.error("[BAL] handle join for tx: {}", [tx])
+  log.warning("[BAL] handle join for tx: {}", [tx])
   let lp = createOrUpdate(poolAddress, tx, userAddrs, true);
   updateDayData(lp, userAddrs, event);
 }
@@ -76,7 +76,7 @@ export function handleJoin(event: LOG_JOIN): void {
 export function handleBurn(event: LOG_EXIT): void {
   let poolAddress = event.address;
   let tx = event.transaction.hash.toHexString();
-  log.error("[BAL] handle burn for tx: {}", [tx])
+  log.warning("[BAL] handle burn for tx: {}", [tx])
   let userAddrs = event.transaction.from;
   let lp = createOrUpdate(poolAddress, tx, userAddrs, true);
   updateDayData(lp, userAddrs, event);
@@ -85,7 +85,7 @@ export function handleBurn(event: LOG_EXIT): void {
 export function handleTransfer(event: Transfer): void {
   let poolAddress = event.address;
   let tx = event.transaction.hash.toHexString();
-  log.error("[BAL] handle transfer for tx: {}", [tx])
+  log.warning("[BAL] handle transfer for tx: {}", [tx])
 
   let from = event.transaction.from;
   if (from != poolAddress) {

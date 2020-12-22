@@ -1,6 +1,8 @@
 import {LiquidityPosition, UserLiquidityPositionDayData} from "../generated/schema";
 import {Address, BigInt, ethereum} from "@graphprotocol/graph-ts/index";
 
+export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
+
 export function updateDayData(lp: LiquidityPosition, userAddress: Address, event: ethereum.Event): UserLiquidityPositionDayData {
   let timestamp = event.block.timestamp.toI32()
   let dayID = timestamp / 86400

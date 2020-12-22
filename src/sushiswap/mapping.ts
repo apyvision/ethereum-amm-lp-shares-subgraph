@@ -40,7 +40,7 @@ export function createOrUpdate(exchange: Address, userAddrs: Address, balance: B
     .concat(userAddrs.toHexString())
   let lp = LiquidityPosition.load(id)
   if (lp === null) {
-    log.error('LiquidityPosition was not found, creating new one', [id])
+    log.warning('LiquidityPosition was not found, creating new one', [id])
 
 
     lp = new LiquidityPosition(id)

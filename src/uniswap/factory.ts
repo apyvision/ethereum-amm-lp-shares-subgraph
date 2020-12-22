@@ -5,6 +5,6 @@ import {UniswapPair as PairTemplate} from '../../generated/templates'
 
 export function handleNewPair(event: PairCreated): void {
   // create the tracked contract based on the template
-  log.error("[Uniswap] Creating factory tracking for pair: {}", [event.params.pair.toHexString()])
+  log.warning("[Uniswap] Creating factory tracking for pair: {}", [event.params.pair.toHexString()])
   PairTemplate.create(event.params.pair)
 }
