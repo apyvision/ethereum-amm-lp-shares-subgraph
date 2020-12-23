@@ -10,7 +10,7 @@ dataSources:
     source:
       address: "0x9424B1412450D0f8Fc2255FAf6046b98213B76Bd"
       abi: BFactory
-      startBlock: 11400610
+      startBlock: 9562480
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -28,6 +28,32 @@ dataSources:
       eventHandlers:
         - event: LOG_NEW_POOL(indexed address,indexed address)
           handler: handleNewPool
+  - kind: ethereum/contract
+    name: BalancerSmartPoolAmpl
+    network: mainnet
+    source:
+      address: "0x49f2beff98ce62999792ec98d0ee4ad790e7786f"
+      abi: BPoolSmart
+      startBlock: 10965441
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/balancer_smart/mapping_ampl.ts
+      entities:
+        - User
+        - UserDay
+        - LiquidityPosition
+      abis:
+        - name: BPoolSmart
+          file: ./abis/balancer_smart/BPoolSmart.json
+      eventHandlers:
+        - event: LogJoin(indexed address,indexed address,uint256)
+          handler: handleJoin
+        - event: LogExit(indexed address,indexed address,uint256)
+          handler: handleBurn
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
   - kind: ethereum/contract
     name: ValueBFactory
     network: mainnet
@@ -58,7 +84,7 @@ dataSources:
     source:
       address: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f'
       abi: Factory
-      startBlock: 11400610
+      startBlock: 10000834
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -79,7 +105,7 @@ dataSources:
     source:
       address: '0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac'
       abi: Factory
-      startBlock: 11400610
+      startBlock: 10794229
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4

@@ -3,7 +3,7 @@ import {Address, BigDecimal, BigInt, ethereum} from '@graphprotocol/graph-ts'
 import {Burn, Mint, Transfer} from '../../generated/templates/SushiswapPair/Pair'
 import {ERC20} from '../../generated/templates/SushiswapPair/ERC20'
 import {log} from "@graphprotocol/graph-ts/index";
-import {LiquidityPosition, User, UserLiquidityPositionDayData} from "../../generated/schema";
+import {LiquidityPosition, User} from "../../generated/schema";
 import {ADDRESS_ZERO, updateDayData} from "../util";
 
 let BI_18 = BigInt.fromI32(18);

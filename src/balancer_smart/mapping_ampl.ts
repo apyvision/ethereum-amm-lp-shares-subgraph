@@ -1,8 +1,11 @@
-import {BPool, LOG_EXIT, LOG_JOIN, Transfer} from '../../generated/BFactory/BPool'
-import {LiquidityPosition, User, UserLiquidityPositionDayData} from '../../generated/schema'
+import {
+  BPoolSmart,
+  LogExit,
+  LogJoin,
+  Transfer
+} from '../../generated/BalancerSmartPoolAmpl/BPoolSmart'
+import {LiquidityPosition, User} from '../../generated/schema'
 import {Address, BigDecimal, BigInt, log} from "@graphprotocol/graph-ts";
-import {LOG_NEW_POOL} from "../../generated/BFactory/BFactory";
-import {BalancerBPool as BPoolTemplate} from '../../generated/templates'
 import {ADDRESS_ZERO, updateDayData} from "../util";
 
 let BI_18 = BigInt.fromI32(18)
@@ -47,8 +50,8 @@ function createOrUpdate(poolAddress: Address, userAddrs: Address, isMintOrBurn: 
     lp.balanceFromMintBurn = ZERO_BI.toBigDecimal()
   }
 
-  let bal = convertTokenToDecimal(BPool.bind(poolAddress).balanceOf(userAddrs), BI_18);
-  log.warning("[BAL] Setting bal {} for user {} for pool {}", [bal.toString(), userAddrs.toHexString(), poolAddress.toHexString()])
+  let bal = convertTokenToDecimal(BPoolSmart.bind(poolAddress).balanceOf(userAddrs), BI_18);
+  log.warning("[BALSMART] Setting bal {} for user {} for pool {}", [bal.toString(), userAddrs.toHexString(), poolAddress.toHexString()])
 
   lp.balance = bal
   if (isMintOrBurn) {
@@ -60,28 +63,19 @@ function createOrUpdate(poolAddress: Address, userAddrs: Address, isMintOrBurn: 
   return lp as LiquidityPosition
 }
 
-export function handleNewPool(event: LOG_NEW_POOL): void {
-  let poolAddress = event.params.pool;
-  let userAddrs = event.transaction.from;
-  let lp = createOrUpdate(poolAddress, userAddrs, true);
-  updateDayData(lp, userAddrs, event);
-  log.warning("[BAL] Creating factory tracking for pair address: {}", [poolAddress.toHexString()])
-  BPoolTemplate.create(poolAddress);
-}
-
-export function handleJoin(event: LOG_JOIN): void {
+export function handleJoin(event: LogJoin): void {
   let poolAddress = event.address;
   let tx = event.transaction.hash.toHexString();
   let userAddrs = event.transaction.from;
-  log.warning("[BAL] handle join for tx: {}", [tx])
+  log.warning("[BALSMART] handle join for tx: {}", [tx])
   let lp = createOrUpdate(poolAddress, userAddrs, true);
   updateDayData(lp, userAddrs, event);
 }
 
-export function handleBurn(event: LOG_EXIT): void {
+export function handleBurn(event: LogExit): void {
   let poolAddress = event.address;
   let tx = event.transaction.hash.toHexString();
-  log.warning("[BAL] handle burn for tx: {}", [tx])
+  log.warning("[BALSMART] handle burn for tx: {}", [tx])
   let userAddrs = event.transaction.from;
   let lp = createOrUpdate(poolAddress, userAddrs, true);
   updateDayData(lp, userAddrs, event);
@@ -90,15 +84,15 @@ export function handleBurn(event: LOG_EXIT): void {
 export function handleTransfer(event: Transfer): void {
   let poolAddress = event.address;
   let tx = event.transaction.hash.toHexString();
-  log.warning("[BAL] handle transfer for tx: {}", [tx])
+  log.warning("[BALSMART] handle transfer for tx: {}", [tx])
 
-  let from = event.params.src;
+  let from = event.params.from;
   if (from != poolAddress && from.toHexString() != ADDRESS_ZERO) {
     let lp = createOrUpdate(poolAddress, from, false);
     updateDayData(lp, from, event);
   }
 
-  let to = event.params.dst;
+  let to = event.params.to;
   if (to != poolAddress && to.toHexString() != ADDRESS_ZERO) {
     let lp2 = createOrUpdate(poolAddress, to as Address, false);
     updateDayData(lp2, to as Address, event);
