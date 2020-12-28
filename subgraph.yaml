@@ -48,10 +48,6 @@ dataSources:
         - name: BPoolSmart
           file: ./abis/balancer_smart/BPoolSmart.json
       eventHandlers:
-        - event: LogJoin(indexed address,indexed address,uint256)
-          handler: handleJoin
-        - event: LogExit(indexed address,indexed address,uint256)
-          handler: handleBurn
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
   - kind: ethereum/contract
@@ -139,10 +135,6 @@ templates:
         - name: BPool
           file: ./abis/balancer/BPool.json
       eventHandlers:
-        - event: LOG_JOIN(indexed address,indexed address,uint256)
-          handler: handleJoin
-        - event: LOG_EXIT(indexed address,indexed address,uint256)
-          handler: handleBurn
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
   - kind: ethereum/contract
@@ -163,10 +155,6 @@ templates:
         - name: FaaSPoolLite
           file: ./abis/value/FaaSPoolLite.json
       eventHandlers:
-        - event: LOG_JOIN(indexed address,indexed address,uint256)
-          handler: handleJoin
-        - event: LOG_EXIT(indexed address,indexed address,uint256)
-          handler: handleBurn
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
   - kind: ethereum/contract
@@ -189,10 +177,6 @@ templates:
         - name: ERC20
           file: ./abis/ERC20.json
       eventHandlers:
-        - event: Mint(indexed address,uint256,uint256)
-          handler: handleMint
-        - event: Burn(indexed address,uint256,uint256,indexed address)
-          handler: handleBurn
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
   - kind: ethereum/contract
@@ -215,9 +199,5 @@ templates:
         - name: ERC20
           file: ./abis/ERC20.json
       eventHandlers:
-        - event: Mint(indexed address,uint256,uint256)
-          handler: handleMint
-        - event: Burn(indexed address,uint256,uint256,indexed address)
-          handler: handleBurn
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer

@@ -1,97 +1,43 @@
 /* eslint-disable prefer-const */
-import {BigInt, BigDecimal, ethereum, Address} from '@graphprotocol/graph-ts'
-import {Mint, Burn, Transfer} from '../../generated/templates/UniswapPair/Pair'
+import {Address, BigDecimal, BigInt} from '@graphprotocol/graph-ts'
+import {Burn, Mint, Transfer} from '../../generated/templates/UniswapPair/Pair'
 import {ERC20} from '../../generated/templates/UniswapPair/ERC20'
-import {log} from "@graphprotocol/graph-ts/index";
-import {LiquidityPosition, User, UserLiquidityPositionDayData} from "../../generated/schema";
-import {ADDRESS_ZERO, updateDayData} from "../util";
+import {
+  ADDRESS_ZERO,
+  createException, createOrUpdate,
+  updateDayData,
+} from "../util";
 
-let BI_18 = BigInt.fromI32(18);
-let ZERO_BI = BigInt.fromI32(0);
-let ONE_BI = BigInt.fromI32(1);
-
-function exponentToBigDecimal(decimals: BigInt): BigDecimal {
-  let bd = BigDecimal.fromString('1');
-  for (let i = ZERO_BI; i.lt(decimals as BigInt); i = i.plus(ONE_BI)) {
-    bd = bd.times(BigDecimal.fromString('10'));
-  }
-  return bd;
-}
-
-function convertTokenToDecimal(tokenAmount: BigInt, exchangeDecimals: BigInt): BigDecimal {
-  if (exchangeDecimals == ZERO_BI) {
-    return tokenAmount.toBigDecimal();
-  }
-  return tokenAmount.toBigDecimal().div(exponentToBigDecimal(exchangeDecimals));
-}
-
-export function createOrUpdate(exchange: Address, userAddrs: Address, balance: BigInt, isMintOrBurn: boolean): LiquidityPosition {
-  let userId = userAddrs.toHexString()
-
-  let user = User.load(userId)
-  if (user == null) {
-    user = new User(userId)
-    user.save()
-  }
-
-  let id = exchange
-    .toHexString()
-    .concat('-')
-    .concat(userAddrs.toHexString())
-  let lp = LiquidityPosition.load(id)
-  if (lp === null) {
-    log.warning('LiquidityPosition was not found, creating new one', [id])
-    lp = new LiquidityPosition(id)
-    lp.poolAddress = exchange
-    lp.user = user.id
-    lp.balanceFromMintBurn = ZERO_BI.toBigDecimal()
-    lp.poolProviderName = "Uniswap"
-  }
-
-  let bal = convertTokenToDecimal(balance, BI_18);
-  lp.balance = bal;
-  if (isMintOrBurn) {
-    lp.balanceFromMintBurn = bal;
-  }
-  lp.save()
-
-  return lp as LiquidityPosition
-}
-
-export function handleMint(event: Mint): void {
-  let uniV2TokenAddrs = event.address;
-  let contract = ERC20.bind(uniV2TokenAddrs);
-  let userAddrs = event.transaction.from;
-  let balance = contract.balanceOf(userAddrs);
-  let lp = createOrUpdate(uniV2TokenAddrs, userAddrs, balance, true);
-  updateDayData(lp, userAddrs, event);
-}
-
-export function handleBurn(event: Burn): void {
-  let uniV2TokenAddrs = event.address;
-  let userAddrs = event.transaction.from;
-  let contract = ERC20.bind(uniV2TokenAddrs);
-  let balance = contract.balanceOf(userAddrs);
-  let lp = createOrUpdate(uniV2TokenAddrs, userAddrs, balance, true);
-  updateDayData(lp, userAddrs, event);
-}
+let PROVIDER_NAME = "Uniswap";
 
 export function handleTransfer(event: Transfer): void {
   let uniV2TokenAddrs = event.address;
   let contract = ERC20.bind(uniV2TokenAddrs);
 
   let to = event.params.to as Address;
-  if (to != uniV2TokenAddrs && to.toHexString() != ADDRESS_ZERO) {
-    let balance = contract.balanceOf(to);
-    let lp = createOrUpdate(uniV2TokenAddrs, to, balance, false);
-    updateDayData(lp, to, event);
+  let from = event.params.from as Address;
+
+  if (to == uniV2TokenAddrs || from == uniV2TokenAddrs) {
+    createException(uniV2TokenAddrs, event.transaction.hash, "Saw a transfer event going to or from itself. Please check!!!")
+    return;
   }
 
-  let from = event.params.from as Address;
-  if (from != uniV2TokenAddrs && from.toHexString() != ADDRESS_ZERO) {
-    let balanceFrom = contract.balanceOf(from);
-    let lpFrom = createOrUpdate(uniV2TokenAddrs, from, balanceFrom, false);
+  if (to.toHexString() == ADDRESS_ZERO) { // BURN
+    let amt = event.params.value
+    let userAddrs = event.transaction.from;
+    let lp = createOrUpdate(PROVIDER_NAME, uniV2TokenAddrs, userAddrs, amt, 'burn');
+    updateDayData(lp, userAddrs, event);
+  } else if (from.toHexString() == ADDRESS_ZERO) { // MINT
+    let amt = event.params.value
+    let userAddrs = event.transaction.from;
+    let lp = createOrUpdate(PROVIDER_NAME, uniV2TokenAddrs, userAddrs, amt, 'mint');
+    updateDayData(lp, userAddrs, event);
+  } else { // TRANSFER
+    let lp = createOrUpdate(PROVIDER_NAME, uniV2TokenAddrs, to, contract.balanceOf(to), 'transfer');
+    updateDayData(lp, to, event);
+    let lpFrom = createOrUpdate(PROVIDER_NAME, uniV2TokenAddrs, from, contract.balanceOf(from), 'transfer');
     updateDayData(lpFrom, from, event);
   }
+
 }
 

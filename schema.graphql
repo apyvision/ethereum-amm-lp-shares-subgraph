@@ -22,6 +22,12 @@ type UserLiquidityPositionDayData @entity {
   poolProviderName: PoolProvider!
 }
 
+type Exception @entity {
+  id: ID!
+  addrs: Bytes!
+  txHash: Bytes!
+  message: String!
+}
 
 enum PoolProvider {
   Balancer

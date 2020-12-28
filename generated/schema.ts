@@ -229,3 +229,61 @@ export class UserLiquidityPositionDayData extends Entity {
     this.set("poolProviderName", Value.fromString(value));
   }
 }
+
+export class Exception extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save Exception entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save Exception entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("Exception", id.toString(), this);
+  }
+
+  static load(id: string): Exception | null {
+    return store.get("Exception", id) as Exception | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get addrs(): Bytes {
+    let value = this.get("addrs");
+    return value.toBytes();
+  }
+
+  set addrs(value: Bytes) {
+    this.set("addrs", Value.fromBytes(value));
+  }
+
+  get txHash(): Bytes {
+    let value = this.get("txHash");
+    return value.toBytes();
+  }
+
+  set txHash(value: Bytes) {
+    this.set("txHash", Value.fromBytes(value));
+  }
+
+  get message(): string {
+    let value = this.get("message");
+    return value.toString();
+  }
+
+  set message(value: string) {
+    this.set("message", Value.fromString(value));
+  }
+}
