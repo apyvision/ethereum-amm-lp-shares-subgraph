@@ -32,11 +32,11 @@ export function handleTransfer(event: Transfer): void {
 
   if (to.toHexString() == ADDRESS_ZERO) { // BURN
     let userAddrs = event.transaction.from;
-    let lp = createOrUpdate(PROVIDER_NAME, poolAddress, userAddrs, event.params.value, 'burn');
+    let lp = createOrUpdate(PROVIDER_NAME, poolAddress, userAddrs, event.params.amt, 'burn');
     updateDayData(lp, userAddrs, event);
   } else if (from.toHexString() == ADDRESS_ZERO) { // MINT
     let userAddrs = event.transaction.from;
-    let lp = createOrUpdate(PROVIDER_NAME, poolAddress, userAddrs, event.params.value, 'mint');
+    let lp = createOrUpdate(PROVIDER_NAME, poolAddress, userAddrs, event.params.amt, 'mint');
     updateDayData(lp, userAddrs, event);
   } else { // TRANSFER
     let lp = createOrUpdate(PROVIDER_NAME, poolAddress, to, BPool.bind(poolAddress).balanceOf(to), 'transfer');
