@@ -1,16 +1,11 @@
 import {
   FaaSPoolLite,
-  LOG_EXIT,
-  LOG_JOIN,
   Transfer
 } from '../../generated/ValueBFactory/FaaSPoolLite'
-import {LiquidityPosition, User} from '../../generated/schema'
 import {Address, BigDecimal, BigInt, log} from "@graphprotocol/graph-ts";
-import {LOG_NEW_POOL} from "../../generated/BFactory/BFactory";
+import {LOG_NEW_POOL} from "../../generated/ValueBFactory/BFactory";
 import {ValueBPool as BPoolTemplate} from '../../generated/templates'
 import {ADDRESS_ZERO, createException, createOrUpdate, updateDayData} from "../util";
-import {BPool} from "../../generated/BFactory/BPool";
-
 
 let PROVIDER_NAME = "VALUE"
 
@@ -39,9 +34,9 @@ export function handleTransfer(event: Transfer): void {
     let lp = createOrUpdate(PROVIDER_NAME, poolAddress, userAddrs, event.params.amt, 'mint');
     updateDayData(lp, userAddrs, event);
   } else { // TRANSFER
-    let lp = createOrUpdate(PROVIDER_NAME, poolAddress, to, BPool.bind(poolAddress).balanceOf(to), 'transfer');
+    let lp = createOrUpdate(PROVIDER_NAME, poolAddress, to, FaaSPoolLite.bind(poolAddress).balanceOf(to), 'transfer');
     updateDayData(lp, to, event);
-    let lpFrom = createOrUpdate(PROVIDER_NAME, poolAddress, from, BPool.bind(poolAddress).balanceOf(from), 'transfer');
+    let lpFrom = createOrUpdate(PROVIDER_NAME, poolAddress, from, FaaSPoolLite.bind(poolAddress).balanceOf(from), 'transfer');
     updateDayData(lpFrom, from, event);
   }
 
