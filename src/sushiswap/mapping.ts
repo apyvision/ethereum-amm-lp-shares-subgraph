@@ -18,21 +18,28 @@ export function handleTransfer(event: Transfer): void {
     return;
   }
 
+  // this is the caller of the contract interaction
+  let initiator = event.transaction.from;
+
   if (to.toHexString() == ADDRESS_ZERO) { // BURN
     let amt = event.params.value
-    let from = event.transaction.from
+    let from = initiator
     let lp = createOrUpdate(PROVIDER_NAME, uniV2TokenAddrs, from, amt, 'burn');
     updateDayData(lp, from, event);
   } else if (from.toHexString() == ADDRESS_ZERO) { // MINT
     let amt = event.params.value
-    let from = event.transaction.from
+    let from = initiator
     let lp = createOrUpdate(PROVIDER_NAME, uniV2TokenAddrs, from, amt, 'mint');
     updateDayData(lp, from, event);
   } else { // TRANSFER
-    let lp = createOrUpdate(PROVIDER_NAME, uniV2TokenAddrs, to, contract.balanceOf(to), 'transfer');
-    updateDayData(lp, to, event);
-    let lpFrom = createOrUpdate(PROVIDER_NAME, uniV2TokenAddrs, from, contract.balanceOf(from), 'transfer');
-    updateDayData(lpFrom, from, event);
+    if (initiator == to) {
+      let lp = createOrUpdate(PROVIDER_NAME, uniV2TokenAddrs, to, contract.balanceOf(to), 'transfer');
+      updateDayData(lp, to, event);
+    }
+    if (initiator == from) {
+      let lpFrom = createOrUpdate(PROVIDER_NAME, uniV2TokenAddrs, from, contract.balanceOf(from), 'transfer');
+      updateDayData(lpFrom, from, event);
+    }
   }
 
 }

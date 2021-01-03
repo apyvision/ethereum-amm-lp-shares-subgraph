@@ -1,12 +1,8 @@
 /* eslint-disable prefer-const */
-import {Address, BigDecimal, BigInt} from '@graphprotocol/graph-ts'
-import {Burn, Mint, Transfer} from '../../generated/templates/UniswapPair/Pair'
+import {Address, log} from '@graphprotocol/graph-ts'
+import {Transfer} from '../../generated/templates/UniswapPair/Pair'
 import {ERC20} from '../../generated/templates/UniswapPair/ERC20'
-import {
-  ADDRESS_ZERO,
-  createException, createOrUpdate,
-  updateDayData,
-} from "../util";
+import {ADDRESS_ZERO, createException, createOrUpdate, updateDayData,} from "../util";
 
 let PROVIDER_NAME = "Uniswap";
 
@@ -22,21 +18,27 @@ export function handleTransfer(event: Transfer): void {
     return;
   }
 
+  let initiator = event.transaction.from;
   if (to.toHexString() == ADDRESS_ZERO) { // BURN
     let amt = event.params.value
-    let userAddrs = event.transaction.from;
-    let lp = createOrUpdate(PROVIDER_NAME, uniV2TokenAddrs, userAddrs, amt, 'burn');
-    updateDayData(lp, userAddrs, event);
+    log.warning("BURN event for tx {} for user {} with amount {}", [event.transaction.hash.toHexString(), initiator.toHexString(), amt])
+    let lp = createOrUpdate(PROVIDER_NAME, uniV2TokenAddrs, initiator, amt, 'burn');
+    updateDayData(lp, initiator, event);
   } else if (from.toHexString() == ADDRESS_ZERO) { // MINT
     let amt = event.params.value
-    let userAddrs = event.transaction.from;
-    let lp = createOrUpdate(PROVIDER_NAME, uniV2TokenAddrs, userAddrs, amt, 'mint');
-    updateDayData(lp, userAddrs, event);
+    log.warning("MINT event for tx {} for user {}", [event.transaction.hash.toHexString(), initiator.toHexString(), amt])
+    let lp = createOrUpdate(PROVIDER_NAME, uniV2TokenAddrs, initiator, amt, 'mint');
+    updateDayData(lp, initiator, event);
   } else { // TRANSFER
-    let lp = createOrUpdate(PROVIDER_NAME, uniV2TokenAddrs, to, contract.balanceOf(to), 'transfer');
-    updateDayData(lp, to, event);
-    let lpFrom = createOrUpdate(PROVIDER_NAME, uniV2TokenAddrs, from, contract.balanceOf(from), 'transfer');
-    updateDayData(lpFrom, from, event);
+
+    if (initiator == to) {
+      let lp = createOrUpdate(PROVIDER_NAME, uniV2TokenAddrs, to, contract.balanceOf(to), 'transfer');
+      updateDayData(lp, to, event);
+    }
+    if (initiator == from) {
+      let lpFrom = createOrUpdate(PROVIDER_NAME, uniV2TokenAddrs, from, contract.balanceOf(from), 'transfer');
+      updateDayData(lpFrom, from, event);
+    }
   }
 
 }
