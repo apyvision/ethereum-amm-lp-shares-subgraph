@@ -16,13 +16,8 @@ export function handleTransfer(event: Transfer): void {
   let poolAddress = event.address;
   let to = event.params.dst as Address;
   let from = event.params.src;
-
-  if (to == poolAddress || from == poolAddress) {
-    createException(poolAddress, event.transaction.hash, "Saw a transfer event going to or from itself. Please check!!!")
-    return;
-  }
-
   let initiator = event.transaction.from;
+
   if (to.toHexString() == ADDRESS_ZERO) { // BURN
     let lp = createOrUpdate(PROVIDER_NAME, poolAddress, initiator, event.params.amt, 'burn');
     updateDayData(lp, initiator, event);

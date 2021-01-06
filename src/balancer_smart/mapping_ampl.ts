@@ -11,12 +11,6 @@ export function handleTransfer(event: Transfer): void {
   let poolAddress = event.address;
   let to = event.params.to as Address;
   let from = event.params.from;
-
-  if (to == poolAddress || from == poolAddress) {
-    createException(poolAddress, event.transaction.hash, "Saw a transfer event going to or from itself. Please check!!!")
-    return;
-  }
-
   let initiator = event.transaction.from;
   let numLpTokens = event.params.value;
 
