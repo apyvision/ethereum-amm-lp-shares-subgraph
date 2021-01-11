@@ -2,7 +2,14 @@ import {FaaSPoolLite, Transfer} from '../../generated/ValueBFactory/FaaSPoolLite
 import {Address, log} from "@graphprotocol/graph-ts";
 import {LOG_NEW_POOL} from "../../generated/ValueBFactory/BFactory";
 import {ValueBPool as BPoolTemplate} from '../../generated/templates'
-import {ADDRESS_ZERO, createException, createOrUpdate, updateDayData} from "../util";
+import {
+  ADDRESS_ZERO,
+  createException,
+  createOrUpdate,
+  MINUS_ONE,
+  updateDayData,
+  ZERO_BI
+} from "../util";
 
 let PROVIDER_NAME = "VALUE"
 
@@ -19,18 +26,18 @@ export function handleTransfer(event: Transfer): void {
   let initiator = event.transaction.from;
 
   if (to.toHexString() == ADDRESS_ZERO) { // BURN
-    let lp = createOrUpdate(PROVIDER_NAME, poolAddress, initiator, event.params.amt, 'burn');
+    let lp = createOrUpdate(PROVIDER_NAME, poolAddress, initiator, event.params.amt.times(MINUS_ONE));
     updateDayData(lp, initiator, event);
   } else if (from.toHexString() == ADDRESS_ZERO) { // MINT
-    let lp = createOrUpdate(PROVIDER_NAME, poolAddress, initiator, event.params.amt, 'mint');
+    let lp = createOrUpdate(PROVIDER_NAME, poolAddress, initiator, event.params.amt);
     updateDayData(lp, initiator, event);
   } else { // TRANSFER
     if (initiator == to) {
-      let lp = createOrUpdate(PROVIDER_NAME, poolAddress, to, FaaSPoolLite.bind(poolAddress).balanceOf(to), 'transfer');
+      let lp = createOrUpdate(PROVIDER_NAME, poolAddress, to, ZERO_BI);
       updateDayData(lp, to, event);
     }
     if (initiator == from) {
-      let lpFrom = createOrUpdate(PROVIDER_NAME, poolAddress, from, FaaSPoolLite.bind(poolAddress).balanceOf(from), 'transfer');
+      let lpFrom = createOrUpdate(PROVIDER_NAME, poolAddress, from, ZERO_BI);
       updateDayData(lpFrom, from, event);
     }
   }

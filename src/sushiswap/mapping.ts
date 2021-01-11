@@ -2,7 +2,7 @@
 import {Address, log} from '@graphprotocol/graph-ts'
 import {Transfer} from '../../generated/templates/SushiswapPair/Pair'
 import {ERC20} from '../../generated/templates/SushiswapPair/ERC20'
-import {ADDRESS_ZERO, createOrUpdate, updateDayData} from "../util";
+import {ADDRESS_ZERO, createOrUpdate, MINUS_ONE, updateDayData, ZERO_BI} from "../util";
 
 let PROVIDER_NAME = "Sushiswap";
 
@@ -16,20 +16,20 @@ export function handleTransfer(event: Transfer): void {
   if (to.toHexString() == ADDRESS_ZERO) { // BURN
     let amt = event.params.value
     log.warning("BURN event for tx {} for user {} with amount {}", [event.transaction.hash.toHexString(), initiator.toHexString(), amt.toString()])
-    let lp = createOrUpdate(PROVIDER_NAME, uniV2TokenAddrs, initiator, amt, 'burn');
+    let lp = createOrUpdate(PROVIDER_NAME, uniV2TokenAddrs, initiator, amt.times(MINUS_ONE));
     updateDayData(lp, initiator, event);
   } else if (from.toHexString() == ADDRESS_ZERO) { // MINT
     let amt = event.params.value
     log.warning("MINT event for tx {} for user {} with amount {}", [event.transaction.hash.toHexString(), initiator.toHexString(), amt.toString()])
-    let lp = createOrUpdate(PROVIDER_NAME, uniV2TokenAddrs, initiator, amt, 'mint');
+    let lp = createOrUpdate(PROVIDER_NAME, uniV2TokenAddrs, initiator, amt);
     updateDayData(lp, initiator, event);
   } else { // TRANSFER
     if (initiator == to) {
-      let lp = createOrUpdate(PROVIDER_NAME, uniV2TokenAddrs, to, contract.balanceOf(to), 'transfer');
+      let lp = createOrUpdate(PROVIDER_NAME, uniV2TokenAddrs, to, ZERO_BI);
       updateDayData(lp, to, event);
     }
     if (initiator == from) {
-      let lpFrom = createOrUpdate(PROVIDER_NAME, uniV2TokenAddrs, from, contract.balanceOf(from), 'transfer');
+      let lpFrom = createOrUpdate(PROVIDER_NAME, uniV2TokenAddrs, from, ZERO_BI);
       updateDayData(lpFrom, from, event);
     }
   }

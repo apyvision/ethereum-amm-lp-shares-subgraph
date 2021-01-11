@@ -5,8 +5,10 @@ import {
   UserLiquidityPositionDayData
 } from "../generated/schema";
 import {Address, BigDecimal, BigInt, Bytes, ethereum, log} from "@graphprotocol/graph-ts/index";
+import {ERC20} from "../generated/templates/UniswapPair/ERC20";
 
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
+export const MINUS_ONE = BigInt.fromI32(-1);
 export const BI_18 = BigInt.fromI32(18);
 export const ZERO_BI = BigInt.fromI32(0);
 export const ONE_BI = BigInt.fromI32(1);
@@ -58,7 +60,7 @@ export function convertTokenToDecimal(tokenAmount: BigInt, exchangeDecimals: Big
   return tokenAmount.toBigDecimal().div(exponentToBigDecimal(exchangeDecimals));
 }
 
-export function createOrUpdate(providerName: string, poolAddrs: Address, userAddrs: Address, val: BigInt, operation: string): LiquidityPosition {
+export function createOrUpdate(providerName: string, poolAddrs: Address, userAddrs: Address, addToMintBurnVal: BigInt): LiquidityPosition {
   let userId = userAddrs.toHexString()
 
   let user = User.load(userId)
@@ -81,14 +83,14 @@ export function createOrUpdate(providerName: string, poolAddrs: Address, userAdd
     lp.poolProviderName = providerName
   }
 
-  let bal = convertTokenToDecimal(val, BI_18);
-  lp.balance = bal;
-  if (operation == 'mint') {
-    lp.balanceFromMintBurn = lp.balanceFromMintBurn.plus(bal);
-  } else if (operation == 'burn') {
-    lp.balanceFromMintBurn = lp.balanceFromMintBurn.minus(bal);
-  }
+  let mintBurnValToAdd = convertTokenToDecimal(addToMintBurnVal, BI_18);
+  lp.balanceFromMintBurn = lp.balanceFromMintBurn.plus(mintBurnValToAdd);
+  lp.balance = getBalanceOf(poolAddrs, userAddrs);
   lp.save()
 
   return lp as LiquidityPosition
+}
+
+function getBalanceOf(poolAddrs: Address, userAddrs: Address): BigDecimal {
+  return convertTokenToDecimal(ERC20.bind(poolAddrs).balanceOf(userAddrs), BI_18);
 }
