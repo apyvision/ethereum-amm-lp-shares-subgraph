@@ -1,12 +1,9 @@
-import {
-  BPoolSmart,
-  Transfer
-} from '../../generated/BalancerSmartPoolAmpl/BPoolSmart'
-import {Address, BigDecimal, BigInt, log} from "@graphprotocol/graph-ts";
+import {Transfer} from '../../generated/BalancerSmartPoolAmpl/BPoolSmart'
+import {Address, log} from "@graphprotocol/graph-ts";
 import {
   ADDRESS_ZERO,
-  createException,
-  createOrUpdate,
+  createOrUpdateLiquidityPosition,
+  createTransferEvent,
   MINUS_ONE,
   updateDayData,
   ZERO_BI
@@ -17,29 +14,46 @@ let PROVIDER_NAME = "Balancer"
 export function handleTransfer(event: Transfer): void {
   let poolAddress = event.address;
   let to = event.params.to as Address;
-  let from = event.params.from;
+  let from = event.params.from as Address;
+  let amt = event.params.value;
+
+  // this is who executed the txn, it can be diff than the from address
   let initiator = event.transaction.from;
-  let numLpTokens = event.params.value;
 
   if (to.toHexString() == ADDRESS_ZERO) { // BURN
-    log.warning("[BALSMART] BURN EVENT FOR {}: {} Tokens", [initiator.toHexString(), numLpTokens.toString()])
-    let userAddrs = initiator;
-    let lp = createOrUpdate(PROVIDER_NAME, poolAddress, userAddrs, numLpTokens.times(MINUS_ONE));
-    updateDayData(lp, userAddrs, event);
+    log.warning("[{}] BURN event for tx {} for user {} with amount {}", [PROVIDER_NAME, event.transaction.hash.toHexString(), initiator.toHexString(), amt.toString()])
+
+    updateDayData(createOrUpdateLiquidityPosition(PROVIDER_NAME, poolAddress, initiator, amt.times(MINUS_ONE)), initiator, event);
+
+    // if the from is not same as initator, also record this (since some contracts are using relayers, we want to log the "from" to the from event
+    if (from != initiator) {
+      updateDayData(createOrUpdateLiquidityPosition(PROVIDER_NAME, poolAddress, from, amt.times(MINUS_ONE)), from, event);
+    }
+
+    createTransferEvent(event, from, from, to, amt)
+
   } else if (from.toHexString() == ADDRESS_ZERO) { // MINT
-    log.warning("[BALSMART] MINT EVENT FOR {}: {} Tokens", [initiator.toHexString(), numLpTokens.toString()])
-    let userAddrs = initiator;
-    let lp = createOrUpdate(PROVIDER_NAME, poolAddress, userAddrs, numLpTokens);
-    updateDayData(lp, userAddrs, event);
+    log.warning("[{}] MINT event for tx {} for user {} with amount {}", [PROVIDER_NAME, event.transaction.hash.toHexString(), initiator.toHexString(), amt.toString()])
+
+    updateDayData(createOrUpdateLiquidityPosition(PROVIDER_NAME, poolAddress, initiator, amt), initiator, event);
+
+    // if the from is not same as initator, also record this (since some contracts are using relayers, we want to log the "from" to the from event
+    if (to != initiator) {
+      updateDayData(createOrUpdateLiquidityPosition(PROVIDER_NAME, poolAddress, to, amt.times(MINUS_ONE)), from, event);
+    }
+
+    createTransferEvent(event, to, from, to, amt)
+
   } else { // TRANSFER
-    if (initiator == to) {
-      let lp = createOrUpdate(PROVIDER_NAME, poolAddress, to, ZERO_BI);
-      updateDayData(lp, to, event);
+    updateDayData(createOrUpdateLiquidityPosition(PROVIDER_NAME, poolAddress, to, ZERO_BI), to, event);
+    updateDayData(createOrUpdateLiquidityPosition(PROVIDER_NAME, poolAddress, from, ZERO_BI), from, event);
+    if (initiator != to && initiator != from) {
+      updateDayData(createOrUpdateLiquidityPosition(PROVIDER_NAME, poolAddress, initiator, ZERO_BI), initiator, event);
     }
-    if (initiator == from) {
-      let lpFrom = createOrUpdate(PROVIDER_NAME, poolAddress, from, ZERO_BI);
-      updateDayData(lpFrom, from, event);
-    }
+
+    createTransferEvent(event, from, from, to, amt)
+    createTransferEvent(event, to, from, to, amt)
+
   }
 }
 

@@ -230,6 +230,109 @@ export class UserLiquidityPositionDayData extends Entity {
   }
 }
 
+export class LPTransfer extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save LPTransfer entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save LPTransfer entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("LPTransfer", id.toString(), this);
+  }
+
+  static load(id: string): LPTransfer | null {
+    return store.get("LPTransfer", id) as LPTransfer | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get userAddress(): Bytes {
+    let value = this.get("userAddress");
+    return value.toBytes();
+  }
+
+  set userAddress(value: Bytes) {
+    this.set("userAddress", Value.fromBytes(value));
+  }
+
+  get poolAddress(): Bytes {
+    let value = this.get("poolAddress");
+    return value.toBytes();
+  }
+
+  set poolAddress(value: Bytes) {
+    this.set("poolAddress", Value.fromBytes(value));
+  }
+
+  get transactionHash(): Bytes {
+    let value = this.get("transactionHash");
+    return value.toBytes();
+  }
+
+  set transactionHash(value: Bytes) {
+    this.set("transactionHash", Value.fromBytes(value));
+  }
+
+  get blockNumber(): BigInt {
+    let value = this.get("blockNumber");
+    return value.toBigInt();
+  }
+
+  set blockNumber(value: BigInt) {
+    this.set("blockNumber", Value.fromBigInt(value));
+  }
+
+  get from(): Bytes {
+    let value = this.get("from");
+    return value.toBytes();
+  }
+
+  set from(value: Bytes) {
+    this.set("from", Value.fromBytes(value));
+  }
+
+  get to(): Bytes {
+    let value = this.get("to");
+    return value.toBytes();
+  }
+
+  set to(value: Bytes) {
+    this.set("to", Value.fromBytes(value));
+  }
+
+  get value(): BigDecimal {
+    let value = this.get("value");
+    return value.toBigDecimal();
+  }
+
+  set value(value: BigDecimal) {
+    this.set("value", Value.fromBigDecimal(value));
+  }
+
+  get timestamp(): BigInt {
+    let value = this.get("timestamp");
+    return value.toBigInt();
+  }
+
+  set timestamp(value: BigInt) {
+    this.set("timestamp", Value.fromBigInt(value));
+  }
+}
+
 export class Exception extends Entity {
   constructor(id: string) {
     super();

@@ -22,6 +22,18 @@ type UserLiquidityPositionDayData @entity {
   poolProviderName: PoolProvider!
 }
 
+type LPTransfer @entity {
+  id: ID!
+  userAddress: Bytes!
+  poolAddress: Bytes!
+  transactionHash: Bytes!
+  blockNumber: BigInt!
+  from: Bytes!
+  to: Bytes!
+  value: BigDecimal!
+  timestamp: BigInt!
+}
+
 type Exception @entity {
   id: ID!
   addrs: Bytes!

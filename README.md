@@ -8,6 +8,10 @@ Supports Balancer, Sushiswap and Uniswap -- more to be added later.
 This is one of the subgraphs used for [APY Vision](https://apy.vision)
 
 #### Building
+```
+nvm use 10.16.3
+```
+
 To generate the mapping ts files, please do:
 ```
 yarn codegen

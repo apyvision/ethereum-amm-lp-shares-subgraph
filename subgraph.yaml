@@ -25,6 +25,8 @@ dataSources:
           file: ./abis/balancer/BFactory.json
         - name: BPool
           file: ./abis/balancer/BPool.json
+        - name: ERC20
+          file: ./abis/ERC20.json
       eventHandlers:
         - event: LOG_NEW_POOL(indexed address,indexed address)
           handler: handleNewPool
@@ -47,6 +49,8 @@ dataSources:
       abis:
         - name: BPoolSmart
           file: ./abis/balancer_smart/BPoolSmart.json
+        - name: ERC20
+          file: ./abis/ERC20.json
       eventHandlers:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
@@ -56,7 +60,7 @@ dataSources:
     source:
       address: "0xebc44681c125d63210a33d30c55fd3d37762675b"
       abi: BFactory
-      startBlock: 10961776
+      startBlock: 10672700
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -71,6 +75,8 @@ dataSources:
           file: ./abis/value/BFactory.json
         - name: FaaSPoolLite
           file: ./abis/value/FaaSPoolLite.json
+        - name: ERC20
+          file: ./abis/ERC20.json
       eventHandlers:
         - event: LOG_NEW_POOL(indexed address,indexed address)
           handler: handleNewPool
@@ -92,6 +98,8 @@ dataSources:
       abis:
         - name: Factory
           file: ./abis/uniswap/factory.json
+        - name: ERC20
+          file: ./abis/ERC20.json
       eventHandlers:
         - event: PairCreated(indexed address,indexed address,address,uint256)
           handler: handleNewPair
@@ -113,6 +121,8 @@ dataSources:
       abis:
         - name: Factory
           file: ./abis/uniswap/factory.json
+        - name: ERC20
+          file: ./abis/ERC20.json
       eventHandlers:
         - event: PairCreated(indexed address,indexed address,address,uint256)
           handler: handleNewPair
@@ -134,6 +144,8 @@ templates:
       abis:
         - name: BPool
           file: ./abis/balancer/BPool.json
+        - name: ERC20
+          file: ./abis/ERC20.json
       eventHandlers:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
@@ -154,6 +166,8 @@ templates:
       abis:
         - name: FaaSPoolLite
           file: ./abis/value/FaaSPoolLite.json
+        - name: ERC20
+          file: ./abis/ERC20.json
       eventHandlers:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
