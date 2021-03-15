@@ -55,6 +55,29 @@ dataSources:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
   - kind: ethereum/contract
+    name: OneinchV2Factory
+    network: mainnet
+    source:
+      address: '0xbAF9A5d4b0052359326A6CDAb54BABAa3a3A9643'
+      abi: Factory
+      startBlock: 11607841
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/oneinch-v2/factory.ts
+      entities:
+        - Pair
+        - Token
+      abis:
+        - name: Factory
+          file: ./abis/oneinch/MooniswapFactory.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: Deployed(indexed address,indexed address,indexed address)
+          handler: handleNewPair
+  - kind: ethereum/contract
     name: ValueBFactory
     network: mainnet
     source:
@@ -210,6 +233,28 @@ templates:
       abis:
         - name: Pair
           file: ./abis/uniswap/pair.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+  - kind: ethereum/contract
+    name: OneInchPair
+    network: mainnet
+    source:
+      abi: Pair
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/sushiswap/mapping.ts
+      entities:
+        - User
+        - UserLiquidityPositionDayData
+        - LiquidityPosition
+      abis:
+        - name: Pair
+          file: ./abis/oneinch/pair.json
         - name: ERC20
           file: ./abis/ERC20.json
       eventHandlers:

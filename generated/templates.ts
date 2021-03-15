@@ -61,3 +61,17 @@ export class SushiswapPair extends DataSourceTemplate {
     );
   }
 }
+
+export class OneInchPair extends DataSourceTemplate {
+  static create(address: Address): void {
+    DataSourceTemplate.create("OneInchPair", [address.toHex()]);
+  }
+
+  static createWithContext(address: Address, context: DataSourceContext): void {
+    DataSourceTemplate.createWithContext(
+      "OneInchPair",
+      [address.toHex()],
+      context
+    );
+  }
+}
