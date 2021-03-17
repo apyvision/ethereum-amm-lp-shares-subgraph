@@ -42,7 +42,7 @@ export function handleTransfer(event: Transfer): void {
 
     // if the from is not same as initator, also record this (since some contracts are using relayers, we want to log the "from" to the from event
     if (to != initiator) {
-      updateDayData(createOrUpdateLiquidityPosition(PROVIDER_NAME, poolAddress, to, amt.times(MINUS_ONE)), to, event);
+      updateDayData(createOrUpdateLiquidityPosition(PROVIDER_NAME, poolAddress, to, amt), to, event);
       createTransferEvent(event, to, from, to, amt)
     }
 
