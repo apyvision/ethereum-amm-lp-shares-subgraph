@@ -149,6 +149,30 @@ dataSources:
       eventHandlers:
         - event: PairCreated(indexed address,indexed address,address,uint256)
           handler: handleNewPair
+  - kind: ethereum/contract
+    name: BalancerBPool
+    network: mainnet
+    source:
+      address: '0xC697051d1C6296C24aE3bceF39acA743861D9A81'
+      abi: BPool
+      startBlock: 11732298
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/balancer/mapping.ts
+      entities:
+        - User
+        - LiquidityPosition
+        - UserLiquidityPositionDayData
+      abis:
+        - name: BPool
+          file: ./abis/balancer/BPool.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
 templates:
   - kind: ethereum/contract
     name: BalancerBPool
