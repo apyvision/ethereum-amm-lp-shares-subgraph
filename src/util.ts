@@ -1,6 +1,6 @@
 import {
   Exception,
-  LiquidityPosition, LPTransfer,
+  LiquidityPosition, LPTransfer, MintBurnLog,
   User,
   UserLiquidityPositionDayData
 } from "../generated/schema";
@@ -94,6 +94,22 @@ export function createOrUpdateLiquidityPosition(providerName: string, poolAddrs:
 
 function getBalanceOf(poolAddrs: Address, userAddrs: Address): BigDecimal {
   return convertTokenToDecimal(ERC20.bind(poolAddrs).balanceOf(userAddrs), BI_18);
+}
+
+export function createMintBurnLog(event: ethereum.Event, userAddrs: Address, value: BigInt): void {
+  let transactionHash = event.transaction.hash;
+  let txHash = transactionHash.toHexString()
+  let id = txHash
+    .concat('-')
+    .concat(userAddrs.toHexString())
+    .concat(Math.random().toString(5))
+  let mintBurnLog = new MintBurnLog(id)
+  mintBurnLog.userAddress = userAddrs
+  mintBurnLog.poolAddress = event.address
+  mintBurnLog.transactionHash = transactionHash
+  mintBurnLog.blockNumber = event.block.number
+  mintBurnLog.value = convertTokenToDecimal(value, BI_18)
+  mintBurnLog.save()
 }
 
 export function createTransferEvent(event: ethereum.Event, userAddrs: Address, from: Bytes, to: Bytes, value: BigInt): void {

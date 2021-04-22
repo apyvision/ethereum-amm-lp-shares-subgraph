@@ -247,7 +247,7 @@ templates:
       kind: ethereum/events
       apiVersion: 0.0.4
       language: wasm/assemblyscript
-      file: ./src/sushiswap/mapping.ts
+      file: ./src/oneinch-v2/mapping.ts
       entities:
         - User
         - UserLiquidityPositionDayData

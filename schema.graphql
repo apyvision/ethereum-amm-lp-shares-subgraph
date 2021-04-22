@@ -34,6 +34,15 @@ type LPTransfer @entity {
   timestamp: BigInt!
 }
 
+type MintBurnLog @entity {
+  id: ID!
+  userAddress: Bytes!
+  poolAddress: Bytes!
+  transactionHash: Bytes!
+  blockNumber: BigInt!
+  value: BigDecimal!
+}
+
 type Exception @entity {
   id: ID!
   addrs: Bytes!
