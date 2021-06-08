@@ -9,7 +9,8 @@ type LiquidityPosition @entity {
   poolAddress: Bytes!
   balance: BigDecimal!
   balanceFromMintBurn: BigDecimal!
-  poolProviderName: PoolProvider!
+  poolProviderName: PoolProviderName!
+  poolProviderKey: PoolProviderKey!
 }
 
 type UserLiquidityPositionDayData @entity {
@@ -19,7 +20,8 @@ type UserLiquidityPositionDayData @entity {
   poolAddress: Bytes!
   balance: BigDecimal!
   balanceFromMintBurn: BigDecimal!
-  poolProviderName: PoolProvider!
+  poolProviderName: PoolProviderName!
+  poolProviderKey: PoolProviderKey!
 }
 
 type LPTransfer @entity {
@@ -31,6 +33,15 @@ type LPTransfer @entity {
   from: Bytes!
   to: Bytes!
   value: BigDecimal!
+  timestamp: BigInt!
+}
+
+type UserLPTransaction @entity {
+  id: ID!
+  userAddress: Bytes!
+  poolAddress: Bytes!
+  transactionHash: Bytes!
+  blockNumber: BigInt!
   timestamp: BigInt!
 }
 
@@ -50,10 +61,19 @@ type Exception @entity {
   message: String!
 }
 
-enum PoolProvider {
+enum PoolProviderName {
   Balancer
   Uniswap
   Sushiswap
   VALUE
   Oneinch
 }
+
+enum PoolProviderKey {
+  balancer_eth
+  uniswap_eth
+  sushiswap_eth
+  value_eth
+  oneinch_eth
+}
+

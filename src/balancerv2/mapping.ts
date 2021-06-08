@@ -1,5 +1,6 @@
-import {Address, log} from "@graphprotocol/graph-ts";
-import {BalancerBPool as BPoolTemplate} from '../../generated/templates'
+/* eslint-disable prefer-const */
+import {Address, log} from '@graphprotocol/graph-ts'
+import {Transfer} from '../../generated/templates/SushiswapPair/Pair'
 import {
   ADDRESS_ZERO,
   createOrUpdateLiquidityPosition,
@@ -8,16 +9,14 @@ import {
   updateDayData,
   ZERO_BI
 } from "../util";
-import {Transfer} from "../../generated/BalancerBFactory/BPool";
-import {LOG_NEW_POOL} from "../../generated/BalancerBFactory/BFactory";
 
-let PROVIDER_KEY = "balancer_eth";
+let PROVIDER_KEY = "balancerv2_eth";
 
 export function handleTransfer(event: Transfer): void {
   let poolAddress = event.address;
-  let to = event.params.dst as Address;
-  let from = event.params.src as Address;
-  let amt = event.params.amt;
+  let to = event.params.to as Address;
+  let from = event.params.from as Address;
+  let amt = event.params.value;
 
   // this is who executed the txn, it can be diff than the from address
   let initiator = event.transaction.from;
@@ -46,11 +45,5 @@ export function handleTransfer(event: Transfer): void {
     createTransferEvent(event, to, from, to, amt)
 
   }
-}
-
-export function handleNewPool(event: LOG_NEW_POOL): void {
-  let poolAddress = event.params.pool;
-  log.warning("[{}] Creating factory tracking for pair address: {}", [PROVIDER_KEY, poolAddress.toHexString()])
-  BPoolTemplate.create(poolAddress);
 }
 

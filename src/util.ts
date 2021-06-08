@@ -2,7 +2,7 @@ import {
   Exception,
   LiquidityPosition, LPTransfer, MintBurnLog,
   User,
-  UserLiquidityPositionDayData
+  UserLiquidityPositionDayData, UserLPTransaction
 } from "../generated/schema";
 import {Address, BigDecimal, BigInt, Bytes, ethereum, log} from "@graphprotocol/graph-ts/index";
 import {ERC20} from "../generated/templates/UniswapPair/ERC20";
@@ -27,6 +27,7 @@ export function updateDayData(lp: LiquidityPosition, userAddress: Address, event
     dayData = new UserLiquidityPositionDayData(dayPairID)
     dayData.date = dayStartTimestamp
     dayData.poolProviderName = lp.poolProviderName
+    dayData.poolProviderKey = lp.poolProviderKey
     dayData.poolAddress = lp.poolAddress
     dayData.userAddress = userAddress
   }
@@ -61,7 +62,7 @@ export function convertTokenToDecimal(tokenAmount: BigInt, exchangeDecimals: Big
   return tokenAmount.toBigDecimal().div(exponentToBigDecimal(exchangeDecimals));
 }
 
-export function createOrUpdateLiquidityPosition(providerName: string, poolAddrs: Address, userAddrs: Address, addToMintBurnVal: BigInt): LiquidityPosition {
+export function createOrUpdateLiquidityPosition(poolProviderKey: string, poolAddrs: Address, userAddrs: Address, addToMintBurnVal: BigInt): LiquidityPosition {
   let userId = userAddrs.toHexString()
 
   let user = User.load(userId)
@@ -81,7 +82,8 @@ export function createOrUpdateLiquidityPosition(providerName: string, poolAddrs:
     lp.poolAddress = poolAddrs
     lp.user = user.id
     lp.balanceFromMintBurn = ZERO_BI.toBigDecimal()
-    lp.poolProviderName = providerName
+    lp.poolProviderKey = poolProviderKey
+    lp.poolProviderName = getProviderName(poolProviderKey)
   }
 
   let mintBurnValToAdd = convertTokenToDecimal(addToMintBurnVal, BI_18);
@@ -92,6 +94,22 @@ export function createOrUpdateLiquidityPosition(providerName: string, poolAddrs:
   return lp as LiquidityPosition
 }
 
+function getProviderName(poolProviderKey: string): string {
+  if (poolProviderKey == 'balancer_eth') {
+    return 'Balancer'
+  } else if (poolProviderKey == 'uniswap_eth') {
+    return 'Uniswap'
+  } else if (poolProviderKey == 'sushiswap_eth') {
+    return 'Sushiswap'
+  } else if (poolProviderKey == 'value_eth') {
+    return 'VALUE'
+  } else if (poolProviderKey == 'oneinch_eth') {
+    return 'Oneinch'
+  } else {
+    throw 'Unknown pool provider key, please define it!'
+  }
+}
+
 function getBalanceOf(poolAddrs: Address, userAddrs: Address): BigDecimal {
   return convertTokenToDecimal(ERC20.bind(poolAddrs).balanceOf(userAddrs), BI_18);
 }
@@ -99,10 +117,11 @@ function getBalanceOf(poolAddrs: Address, userAddrs: Address): BigDecimal {
 export function createMintBurnLog(event: ethereum.Event, userAddrs: Address, value: BigInt): void {
   let transactionHash = event.transaction.hash;
   let txHash = transactionHash.toHexString()
+  let number = Date.now() as i64
   let id = txHash
     .concat('-')
     .concat(userAddrs.toHexString())
-    .concat(Math.random().toString(5))
+    .concat(number as string)
   let mintBurnLog = new MintBurnLog(id)
   mintBurnLog.userAddress = userAddrs
   mintBurnLog.poolAddress = event.address
@@ -113,20 +132,44 @@ export function createMintBurnLog(event: ethereum.Event, userAddrs: Address, val
 }
 
 export function createTransferEvent(event: ethereum.Event, userAddrs: Address, from: Bytes, to: Bytes, value: BigInt): void {
-  let transactionHash = event.transaction.hash;
-  let txHash = transactionHash.toHexString()
-  let id = txHash
+  let blockNum = event.block.number.toString()
+  let id = blockNum
     .concat('-')
-    .concat(userAddrs.toHexString())
+    .concat(event.address.toHexString())
+    .concat('-')
+    .concat(from.toHexString())
+    .concat('-')
+    .concat(to.toHexString())
+    .concat('-')
+    .concat(value.toString())
 
   let transfer = new LPTransfer(id)
   transfer.userAddress = userAddrs
   transfer.poolAddress = event.address
-  transfer.transactionHash = transactionHash
+  transfer.transactionHash = event.transaction.hash
   transfer.blockNumber = event.block.number
   transfer.from = from
   transfer.to = to
   transfer.value = convertTokenToDecimal(value, BI_18)
   transfer.timestamp = event.block.timestamp
   transfer.save()
+}
+
+export function maybeCreateUserLpTransaction(event: ethereum.Event, userAddrs: Address, poolAddrs: Address): void {
+  let id = userAddrs.toHexString()
+    .concat('-')
+    .concat(poolAddrs.toHexString())
+    .concat('-')
+    .concat(event.block.number.toString())
+
+  if (UserLPTransaction.load(id) === null) {
+    let transfer = new UserLPTransaction(id)
+    transfer.userAddress = userAddrs
+    transfer.poolAddress = poolAddrs
+    transfer.transactionHash = event.transaction.hash
+    transfer.blockNumber = event.block.number
+    transfer.timestamp = event.block.timestamp
+    transfer.save()
+  }
+
 }

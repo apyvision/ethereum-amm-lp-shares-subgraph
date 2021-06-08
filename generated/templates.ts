@@ -6,6 +6,20 @@ import {
   DataSourceContext
 } from "@graphprotocol/graph-ts";
 
+export class WeightedPool extends DataSourceTemplate {
+  static create(address: Address): void {
+    DataSourceTemplate.create("WeightedPool", [address.toHex()]);
+  }
+
+  static createWithContext(address: Address, context: DataSourceContext): void {
+    DataSourceTemplate.createWithContext(
+      "WeightedPool",
+      [address.toHex()],
+      context
+    );
+  }
+}
+
 export class BalancerBPool extends DataSourceTemplate {
   static create(address: Address): void {
     DataSourceTemplate.create("BalancerBPool", [address.toHex()]);
