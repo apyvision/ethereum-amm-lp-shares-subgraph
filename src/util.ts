@@ -97,6 +97,8 @@ export function createOrUpdateLiquidityPosition(poolProviderKey: string, poolAdd
 function getProviderName(poolProviderKey: string): string {
   if (poolProviderKey == 'balancer_eth') {
     return 'Balancer'
+  } else if (poolProviderKey == 'balancerv2_eth') {
+    return 'BalancerV2'
   } else if (poolProviderKey == 'uniswap_eth') {
     return 'Uniswap'
   } else if (poolProviderKey == 'sushiswap_eth') {

@@ -45,6 +45,15 @@ type UserLPTransaction @entity {
   timestamp: BigInt!
 }
 
+type UserContractInteraction @entity {
+  id: ID!
+  userAddress: Bytes!
+  poolAddress: Bytes!
+  contractAddress: Bytes!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+}
+
 type MintBurnLog @entity {
   id: ID!
   userAddress: Bytes!
@@ -67,6 +76,7 @@ enum PoolProviderName {
   Sushiswap
   VALUE
   Oneinch
+  BalancerV2
 }
 
 enum PoolProviderKey {
@@ -75,5 +85,6 @@ enum PoolProviderKey {
   sushiswap_eth
   value_eth
   oneinch_eth
+  balancerv2_eth
 }
 
